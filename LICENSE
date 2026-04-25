@@ -1,201 +1,185 @@
-                                 Apache License
-                           Version 2.0, January 2004
-                        http://www.apache.org/licenses/
+-- ==========================================
+-- NEBULA HUB - BRUTE FORCE EDITION
+-- INSTA STEAL: V49 FORCE RELOADED (Z)
+-- SPEED: STABLE & GROUNDED
+-- INF JUMP: SPACE HOLD ONLY
+-- ==========================================
 
-   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local CoreGui = game:GetService("CoreGui")
 
-   1. Definitions.
+local player = Players.LocalPlayer
+local nebulaRunning = true
+local originalTrans = {}
 
-      "License" shall mean the terms and conditions for use, reproduction,
-      and distribution as defined by Sections 1 through 9 of this document.
+local states = {
+    infJump = false, 
+    speed = false, 
+    noStealSlow = false,
+    bodyAim = false, 
+    xray = false, 
+    esp = false, 
+    smooth = false,
+    autoHit = false 
+}
 
-      "Licensor" shall mean the copyright owner or entity authorized by
-      the copyright owner that is granting the License.
+-- [X-RAY ENGINE]
+local function updateXray()
+    task.spawn(function()
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            if not nebulaRunning then break end
+            if obj:IsA("BasePart") then
+                local n = obj.Name:lower()
+                local isWall = n:find("wall") or n:find("door") or n:find("base") or n:find("glass") or n:find("window") or n:find("roof")
+                local isFloor = n:find("floor") or n:find("plate") or n:find("terrain") or n:find("ground")
+                
+                if isWall and not isFloor and not obj:IsDescendantOf(player.Character) then
+                    if states.xray then
+                        if not originalTrans[obj] then originalTrans[obj] = obj.Transparency end
+                        obj.Transparency = 0.6
+                    else
+                        if originalTrans[obj] then obj.Transparency = originalTrans[obj] end
+                    end
+                end
+            end
+        end
+    end)
+end
 
-      "Legal Entity" shall mean the union of the acting entity and all
-      other entities that control, are controlled by, or are under common
-      control with that entity. For the purposes of this definition,
-      "control" means (i) the power, direct or indirect, to cause the
-      direction or management of such entity, whether by contract or
-      otherwise, or (ii) ownership of fifty percent (50%) or more of the
-      outstanding shares, or (iii) beneficial ownership of such entity.
+-- [V49 FORCE RELOADED INSTANT STEAL]
+local function instantSteal()
+    task.spawn(function()
+        local char = player.Character
+        local root = char and char:FindFirstChild("HumanoidRootPart")
+        if not root then return end
 
-      "You" (or "Your") shall mean an individual or Legal Entity
-      exercising permissions granted by this License.
+        local objs = workspace:GetDescendants()
+        for i, v in ipairs(objs) do
+            if not nebulaRunning then break end
+            if v:IsA("ProximityPrompt") then
+                -- V49 Mantığı: Parent veya Ancestor üzerinden kontrol
+                local pPart = v.Parent:IsA("BasePart") and v.Parent or v:FindFirstAncestorWhichIsA("BasePart")
+                if pPart and (pPart.Position - root.Position).Magnitude < 30 then
+                    -- Tüm engelleri bypass et
+                    v.HoldDuration = 0
+                    v.RequiresLineOfSight = false
+                    v.Enabled = true
+                    
+                    task.spawn(function()
+                        -- V49 En sağlam tetikleme yöntemleri sırasıyla:
+                        v:InputHoldBegin()
+                        if fireproximityprompt then fireproximityprompt(v) end
+                        pcall(function() v:DoPromptActivated() end)
+                        v:InputHoldEnd()
+                    end)
+                end
+            end
+            -- Kasma önleyici milisaniyelik es
+            if i % 500 == 0 then RunService.Heartbeat:Wait() end
+        end
+    end)
+end
 
-      "Source" form shall mean the preferred form for making modifications,
-      including but not limited to software source code, documentation
-      source, and configuration files.
+-- [GUI DESIGN - CLASSIC NEBULA]
+local ScreenGui = Instance.new("ScreenGui", CoreGui)
+ScreenGui.Name = "Nebula_Hub_Official"
 
-      "Object" form shall mean any form resulting from mechanical
-      transformation or translation of a Source form, including but
-      not limited to compiled object code, generated documentation,
-      and conversions to other media types.
+local function createPanel(pos, title)
+    local p = Instance.new("Frame", ScreenGui)
+    p.Size = UDim2.new(0, 185, 0, 260); p.Position = pos; p.BackgroundColor3 = Color3.fromRGB(15, 15, 18); p.Active = true; p.Draggable = true
+    Instance.new("UICorner", p); Instance.new("UIStroke", p).Color = Color3.new(1, 0, 0)
+    local h = Instance.new("TextLabel", p)
+    h.Size = UDim2.new(1, 0, 0, 40); h.Text = title; h.TextColor3 = Color3.new(1, 1, 1); h.Font = Enum.Font.GothamBlack; h.TextSize = 16; h.BackgroundTransparency = 1
+    local sc = Instance.new("ScrollingFrame", p)
+    sc.Size = UDim2.new(1, -10, 1, -50); sc.Position = UDim2.new(0, 5, 0, 45); sc.BackgroundTransparency = 1; sc.CanvasSize = UDim2.new(0, 0, 0, 350); sc.ScrollBarThickness = 0
+    Instance.new("UIListLayout", sc).Padding = UDim.new(0, 5)
+    return p, sc
+end
 
-      "Work" shall mean the work of authorship, whether in Source or
-      Object form, made available under the License, as indicated by a
-      copyright notice that is included in or attached to the work
-      (an example is provided in the Appendix below).
+local LMain, LScroll = createPanel(UDim2.new(0.4, -195, 0.4, -130), "Nebula Hub")
+local RMain, RScroll = createPanel(UDim2.new(0.4, 10, 0.4, -130), "Nebula Hub")
 
-      "Derivative Works" shall mean any work, whether in Source or Object
-      form, that is based on (or derived from) the Work and for which the
-      editorial revisions, annotations, elaborations, or other modifications
-      represent, as a whole, an original work of authorship. For the purposes
-      of this License, Derivative Works shall not include works that remain
-      separable from, or merely link (or bind by name) to the interfaces of,
-      the Work and Derivative Works thereof.
+local CloseBtn = Instance.new("TextButton", RMain)
+CloseBtn.Size = UDim2.new(0, 25, 0, 25); CloseBtn.Position = UDim2.new(1, -30, 0, 8); CloseBtn.Text = "X"; CloseBtn.BackgroundColor3 = Color3.new(0.8, 0, 0); CloseBtn.TextColor3 = Color3.new(1, 1, 1); CloseBtn.Font = Enum.Font.GothamBold; Instance.new("UICorner", CloseBtn)
+CloseBtn.MouseButton1Click:Connect(function() nebulaRunning = false ScreenGui:Destroy() end)
 
-      "Contribution" shall mean any work of authorship, including
-      the original version of the Work and any modifications or additions
-      to that Work or Derivative Works thereof, that is intentionally
-      submitted to Licensor for inclusion in the Work by the copyright owner
-      or by an individual or Legal Entity authorized to submit on behalf of
-      the copyright owner. For the purposes of this definition, "submitted"
-      means any form of electronic, verbal, or written communication sent
-      to the Licensor or its representatives, including but not limited to
-      communication on electronic mailing lists, source code control systems,
-      and issue tracking systems that are managed by, or on behalf of, the
-      Licensor for the purpose of discussing and improving the Work, but
-      excluding communication that is conspicuously marked or otherwise
-      designated in writing by the copyright owner as "Not a Contribution."
+local function createBtn(t, p, sk, it)
+    local b = Instance.new("TextButton", p)
+    b.Size = UDim2.new(1, -10, 0, 35); b.BackgroundColor3 = Color3.fromRGB(25, 25, 30); b.Text = t; b.TextColor3 = Color3.new(1, 1, 1); b.Font = Enum.Font.GothamBold; b.TextSize = 10; Instance.new("UICorner", b)
+    b.MouseButton1Click:Connect(function()
+        if it then states[sk] = not states[sk] b.TextColor3 = states[sk] and Color3.new(0, 1, 0.5) or Color3.new(1, 1, 1)
+        if sk == "xray" then updateXray() end else instantSteal() end
+    end)
+end
 
-      "Contributor" shall mean Licensor and any individual or Legal Entity
-      on behalf of whom a Contribution has been received by Licensor and
-      subsequently incorporated within the Work.
+-- BUTTONS
+createBtn("AUTO HIT", LScroll, "autoHit", true)
+createBtn("INF JUMP (SPACE)", LScroll, "infJump", true)
+createBtn("SPEED (29.5)", LScroll, "speed", true)
+createBtn("NO STEAL SPEED (60)", LScroll, "noStealSlow", true)
+createBtn("INSTANT STEAL (Z)", LScroll, nil, false)
+createBtn("XRAY SMART", RScroll, "xray", true)
+createBtn("SMOOTH FOLLOW", RScroll, "smooth", true)
+createBtn("AIMBOT (BODY)", RScroll, "bodyAim", true)
+createBtn("PLAYER ESP", RScroll, "esp", true)
 
-   2. Grant of Copyright License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      copyright license to reproduce, prepare Derivative Works of,
-      publicly display, publicly perform, sublicense, and distribute the
-      Work and such Derivative Works in Source or Object form.
+-- [PHYSICS ENGINE]
+RunService.Stepped:Connect(function()
+    if not nebulaRunning or not player.Character then return end
+    local r = player.Character:FindFirstChild("HumanoidRootPart")
+    local h = player.Character:FindFirstChildOfClass("Humanoid")
+    if not r or not h then return end
 
-   3. Grant of Patent License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      (except as stated in this section) patent license to make, have made,
-      use, offer to sell, sell, import, and otherwise transfer the Work,
-      where such license applies only to those patent claims licensable
-      by such Contributor that are necessarily infringed by their
-      Contribution(s) alone or by combination of their Contribution(s)
-      with the Work to which such Contribution(s) was submitted. If You
-      institute patent litigation against any entity (including a
-      cross-claim or counterclaim in a lawsuit) alleging that the Work
-      or a Contribution incorporated within the Work constitutes direct
-      or contributory patent infringement, then any patent licenses
-      granted to You under this License for that Work shall terminate
-      as of the date such litigation is filed.
+    -- INF JUMP
+    if states.infJump and UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+        r.Velocity = Vector3.new(r.Velocity.X, 50, r.Velocity.Z)
+    end
 
-   4. Redistribution. You may reproduce and distribute copies of the
-      Work or Derivative Works thereof in any medium, with or without
-      modifications, and in Source or Object form, provided that You
-      meet the following conditions:
+    -- STABLE SPEED
+    local targetS = 0
+    if states.noStealSlow then targetS = 60 elseif states.speed then targetS = 29.5 end
+    
+    if targetS > 0 and h.MoveDirection.Magnitude > 0 then
+        local moveVec = h.MoveDirection * targetS
+        r.Velocity = Vector3.new(moveVec.X, r.Velocity.Y, moveVec.Z)
+    end
 
-      (a) You must give any other recipients of the Work or
-          Derivative Works a copy of this License; and
+    -- AIM & FOLLOW
+    local target = nil; local dist = 600
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character.Humanoid.Health > 0 then
+            local d = (p.Character.HumanoidRootPart.Position - r.Position).Magnitude
+            if d < dist then dist = d; target = p.Character.HumanoidRootPart end
+        end
+    end
 
-      (b) You must cause any modified files to carry prominent notices
-          stating that You changed the files; and
+    if target then
+        if states.bodyAim then
+            r.CFrame = CFrame.lookAt(r.Position, Vector3.new(target.Position.X, r.Position.Y, target.Position.Z))
+        end
+        if states.smooth and dist > 2 then
+            r.Velocity = (target.Position - r.Position).Unit * 50
+        end
+    end
+end)
 
-      (c) You must retain, in the Source form of any Derivative Works
-          that You distribute, all copyright, patent, trademark, and
-          attribution notices from the Source form of the Work,
-          excluding those notices that do not pertain to any part of
-          the Derivative Works; and
+-- [AUTO HIT]
+task.spawn(function()
+    while nebulaRunning do
+        if states.autoHit and player.Character then
+            local t = player.Character:FindFirstChildOfClass("Tool")
+            if t then t:Activate() end
+        end
+        task.wait(0.05)
+    end
+end)
 
-      (d) If the Work includes a "NOTICE" text file as part of its
-          distribution, then any Derivative Works that You distribute must
-          include a readable copy of the attribution notices contained
-          within such NOTICE file, excluding those notices that do not
-          pertain to any part of the Derivative Works, in at least one
-          of the following places: within a NOTICE text file distributed
-          as part of the Derivative Works; within the Source form or
-          documentation, if provided along with the Derivative Works; or,
-          within a display generated by the Derivative Works, if and
-          wherever such third-party notices normally appear. The contents
-          of the NOTICE file are for informational purposes only and
-          do not modify the License. You may add Your own attribution
-          notices within Derivative Works that You distribute, alongside
-          or as an addendum to the NOTICE text from the Work, provided
-          that such additional attribution notices cannot be construed
-          as modifying the License.
-
-      You may add Your own copyright statement to Your modifications and
-      may provide additional or different license terms and conditions
-      for use, reproduction, or distribution of Your modifications, or
-      for any such Derivative Works as a whole, provided Your use,
-      reproduction, and distribution of the Work otherwise complies with
-      the conditions stated in this License.
-
-   5. Submission of Contributions. Unless You explicitly state otherwise,
-      any Contribution intentionally submitted for inclusion in the Work
-      by You to the Licensor shall be under the terms and conditions of
-      this License, without any additional terms or conditions.
-      Notwithstanding the above, nothing herein shall supersede or modify
-      the terms of any separate license agreement you may have executed
-      with Licensor regarding such Contributions.
-
-   6. Trademarks. This License does not grant permission to use the trade
-      names, trademarks, service marks, or product names of the Licensor,
-      except as required for reasonable and customary use in describing the
-      origin of the Work and reproducing the content of the NOTICE file.
-
-   7. Disclaimer of Warranty. Unless required by applicable law or
-      agreed to in writing, Licensor provides the Work (and each
-      Contributor provides its Contributions) on an "AS IS" BASIS,
-      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-      implied, including, without limitation, any warranties or conditions
-      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
-      PARTICULAR PURPOSE. You are solely responsible for determining the
-      appropriateness of using or redistributing the Work and assume any
-      risks associated with Your exercise of permissions under this License.
-
-   8. Limitation of Liability. In no event and under no legal theory,
-      whether in tort (including negligence), contract, or otherwise,
-      unless required by applicable law (such as deliberate and grossly
-      negligent acts) or agreed to in writing, shall any Contributor be
-      liable to You for damages, including any direct, indirect, special,
-      incidental, or consequential damages of any character arising as a
-      result of this License or out of the use or inability to use the
-      Work (including but not limited to damages for loss of goodwill,
-      work stoppage, computer failure or malfunction, or any and all
-      other commercial damages or losses), even if such Contributor
-      has been advised of the possibility of such damages.
-
-   9. Accepting Warranty or Additional Liability. While redistributing
-      the Work or Derivative Works thereof, You may choose to offer,
-      and charge a fee for, acceptance of support, warranty, indemnity,
-      or other liability obligations and/or rights consistent with this
-      License. However, in accepting such obligations, You may act only
-      on Your own behalf and on Your sole responsibility, not on behalf
-      of any other Contributor, and only if You agree to indemnify,
-      defend, and hold each Contributor harmless for any liability
-      incurred by, or claims asserted against, such Contributor by reason
-      of your accepting any such warranty or additional liability.
-
-   END OF TERMS AND CONDITIONS
-
-   APPENDIX: How to apply the Apache License to your work.
-
-      To apply the Apache License to your work, attach the following
-      boilerplate notice, with the fields enclosed by brackets "[]"
-      replaced with your own identifying information. (Don't include
-      the brackets!)  The text should be enclosed in the appropriate
-      comment syntax for the file format. We also recommend that a
-      file or class name and description of purpose be included on the
-      same "printed page" as the copyright notice for easier
-      identification within third-party archives.
-
-   Copyright [yyyy] [name of copyright owner]
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+-- [KEYBINDS]
+UserInputService.InputBegan:Connect(function(i, g)
+    if not g then
+        if i.KeyCode == Enum.KeyCode.Insert then LMain.Visible = not LMain.Visible RMain.Visible = LMain.Visible 
+        elseif i.KeyCode == Enum.KeyCode.Z then instantSteal() end
+    end
+end)
