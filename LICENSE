@@ -799,7 +799,7 @@ mini.Size = UDim2.new(0, 160, 0, 30)
 mini.Position = UDim2.new(0, 50, 0, 50)
 mini.BackgroundColor3 = Color3.fromRGB(8, 8, 8)
 mini.BorderSizePixel = 0
-mini.Text = "Nebula Hub"
+mini.Text = "ENVY HUB"
 mini.TextColor3 = WHITE
 mini.Font = Enum.Font.GothamBold
 mini.TextSize = 11
@@ -2788,7 +2788,7 @@ task.spawn(function() while task.wait(10) do pcall(saveConfig) end end)
 -- Save on leave (BindToClose is server-only)
 Players.LocalPlayer.AncestryChanged:Connect(function() pcall(saveConfig) end)
 
-print("[Nebula Hub] Loaded!")
+print("[Envy Hub] Loaded!")
 
 end)()
 
@@ -2838,7 +2838,7 @@ local function playIntroAnimation()
 	soulLabel.Position = UDim2.new(0, -350, 0.5, -95)
 	soulLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 	soulLabel.BackgroundTransparency = 1
-	soulLabel.Text = "Nebula"
+	soulLabel.Text = "Envy"
 	soulLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
 	soulLabel.TextTransparency = 0
 	soulLabel.TextSize = 88
